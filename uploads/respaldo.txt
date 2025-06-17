@@ -1,0 +1,26 @@
+ @Post()
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: './uploads',  // Carpeta donde se guardarán los archivos
+      filename: (req, file, cb) => {
+        // Genera un nombre único para el archivo
+        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
+
+        // Sanitiza el nombre original del archivo para eliminar espacios y caracteres no deseados
+        const sanitizedOriginalName = file.originalname.replace(/\s/g, '-').replace(/[^a-zA-Z0-9.-]/g, '');
+
+        // Crea el nombre final del archivo con el sufijo único
+        const filename = `${uniqueSuffix}-${sanitizedOriginalName}`;
+
+        // Llama a la función de callback con el nuevo nombre de archivo
+        cb(null, filename);
+      },
+    }),
+    fileFilter: (req, file, cb) => {
+      // Aceptar solo archivos zip o rar
+      cb(null, true);  // Acepta cualquier archivo
+    },
+  }))
+  create(@UploadedFile() file: Express.Multer.File, @Body() createActividadeDto: CreateActividadeDto) {
+    return this.actividadesService.create(createActividadeDto);
+  }

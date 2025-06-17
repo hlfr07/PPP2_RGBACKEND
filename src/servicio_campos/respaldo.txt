@@ -1,0 +1,27 @@
+const servicioExist = await this.servicioRepository.findOneBy({
+      id: parseInt(createServicioCampoDto.id_servicio)
+    });
+
+    if (!servicioExist) {
+      throw new HttpException('Servicio no existe', HttpStatus.BAD_REQUEST);
+    }
+    
+    const campoExist = await this.servicioCampoRepository
+    .createQueryBuilder("servicioCampo")
+    .where("servicioCampo.nombrecampo = :nombrecampo", { nombrecampo: createServicioCampoDto.nombrecampo })
+    .andWhere("servicioCampo.servicio.id = :id_servicio", { id_servicio: servicioExist.id })
+    .getOne();
+  
+    if (campoExist) {
+      throw new HttpException('Campo ya existe para este servicio', HttpStatus.BAD_REQUEST);
+    }
+
+    const servicioCampo = this.servicioCampoRepository.create({
+      nombrecampo: createServicioCampoDto.nombrecampo,
+      tipo: createServicioCampoDto.tipo,
+      servicio: servicioExist
+    });
+
+    await this.servicioCampoRepository.save(servicioCampo);
+
+    return {message : 'Campo creado con exito'};

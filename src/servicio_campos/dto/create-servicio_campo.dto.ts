@@ -1,0 +1,30 @@
+import { ApiProperty } from "@nestjs/swagger";
+import { Transform } from "class-transformer";
+import { IsNotEmpty, IsString, MaxLength, MinLength } from "class-validator";
+
+export class CreateServicioCampoDto {
+    @ApiProperty()
+    @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
+    @IsNotEmpty({ message: 'El nombrecampo no puede estar vacío' })
+    @IsString({ message: 'El nombrecampo debe ser un texto' })
+    @MaxLength(100, { message: 'El nombrecampo debe tener menos de 100 caracteres' })
+    @MinLength(3, { message: 'El nombrecampo debe tener más de 3 caracteres' })
+    nombrecampo: string;
+
+    @ApiProperty()
+    @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
+    @IsNotEmpty({ message: 'El tipo no puede estar vacío' })
+    @IsString({ message: 'El tipo debe ser un texto' })
+    @MaxLength(100, { message: 'El tipo debe tener menos de 100 caracteres' })
+    @MinLength(1, { message: 'El tipo debe tener más de 1 caracteres' })
+    tipo: string;
+
+    @ApiProperty()
+    @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
+    @IsNotEmpty({ message: 'El id_servicio no puede estar vacío' })
+    @IsString({ message: 'El id_servicio debe ser un texto' })
+    @MaxLength(100, { message: 'El id_servicio debe tener menos de 100 caracteres' })
+    @MinLength(1, { message: 'El id_servicio debe tener más de 1 caracteres' })
+    id_servicio: string;
+
+}
