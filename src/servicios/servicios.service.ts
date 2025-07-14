@@ -28,7 +28,8 @@ export class ServiciosService {
 
   findAll() {
     const servicios = this.servicioRepository.find({
-      order: { id: 'DESC' }
+      order: { id: 'DESC' },
+      where: { estado: true } // Assuming you want to filter by active services
     });
 
     return servicios;

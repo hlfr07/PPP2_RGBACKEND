@@ -41,7 +41,7 @@ export class ClientesController {
   @Patch(':cod_contrato')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('clientes', 'put')
-  update(@Param('cod_contrato') cod_contrato: string, @Body() updateClienteDto: UpdateClienteDto) {
+  update(@Param('cod_contrato') cod_contrato: string, @Body() updateClienteDto: any) {
     return this.clientesService.update(+cod_contrato, updateClienteDto);
   }
 

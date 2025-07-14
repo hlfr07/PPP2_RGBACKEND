@@ -51,7 +51,8 @@ export class ClientesService {
     console.log('findAll - Page:', page, 'Size:', pageSize);
     const skip = (page - 1) * pageSize;
     const clientes = await this.clienteRepository.find({
-      order: { cod_contrato: 'DESC' },
+      order: { cod_contrato: 'ASC' },
+      where: { estado: true }, // Assuming you want to filter by active clients 
       skip: skip,
       take: pageSize, // 'take' might be the equivalent of 'limit' in your ORM
     });
@@ -82,41 +83,59 @@ export class ClientesService {
     return cliente;
   }
 
-  async update(cod_contrato: number, updateClienteDto: UpdateClienteDto) {
+async update(cod_contrato: number, updateClienteDto: any) {
+  console.log('update - cod_contrato:', cod_contrato);
+  console.log('update - updateClienteDto:', updateClienteDto);
 
-    const cliente = await this.clienteRepository.findOneBy({
-      cod_contrato: cod_contrato
-    });
+  const cliente = await this.clienteRepository.findOne({
+    where: { cod_contrato },
+    relations: ['distrito'], // importante si tienes relaciones
+  });
 
-    if (!cliente) {
-      throw new HttpException('Cliente no encontrado', HttpStatus.NOT_FOUND);
-    }
+  if (!cliente) {
+    throw new HttpException('Cliente no encontrado', HttpStatus.NOT_FOUND);
+  }
 
+  // Validar distrito solo si se envía
+  if (updateClienteDto.distrito_id !== undefined) {
     const distritoExists = await this.distritoRepository.findOneBy({
-      id: parseInt(updateClienteDto.distrito_id)
+      id: parseInt(updateClienteDto.distrito_id),
     });
 
     if (!distritoExists) {
       throw new HttpException('El distrito no existe', HttpStatus.NOT_FOUND);
     }
 
-    cliente.nombres = updateClienteDto.nombres;
-    cliente.direccion = updateClienteDto.direccion;
-    cliente.domicilio_legal = updateClienteDto.domicilio_legal;
-    cliente.dni = updateClienteDto.dni;
-    cliente.ruc = updateClienteDto.ruc;
-    cliente.telefono = updateClienteDto.telefono;
-    cliente.email = updateClienteDto.email;
-    cliente.nacimiento = updateClienteDto.nacimiento;
-    cliente.ubigeo = updateClienteDto.ubigeo;
     cliente.distrito = distritoExists;
-
-    await this.clienteRepository.update(cod_contrato, cliente);
-
-    return { menssage: 'Cliente actualizado' };
   }
 
+  // Solo actualizar los campos que vienen en el DTO
+  const camposActualizables = [
+    'nombres',
+    'direccion',
+    'domicilio_legal',
+    'dni',
+    'ruc',
+    'telefono',
+    'email',
+    'nacimiento',
+    'ubigeo'
+  ];
+
+  for (const campo of camposActualizables) {
+    if (updateClienteDto[campo] !== undefined) {
+      cliente[campo] = updateClienteDto[campo];
+    }
+  }
+
+  await this.clienteRepository.save(cliente); // usar save para mantener relaciones
+
+  return { message: 'Cliente actualizado correctamente' };
+}
+
+
   async remove(cod_contrato: number) {
+    console.log('remove - cod_contrato:', cod_contrato);
     const cliente = await this.clienteRepository.findOneBy({
       cod_contrato: cod_contrato
     });
@@ -128,6 +147,8 @@ export class ClientesService {
     if (!cliente.estado) {
       throw new HttpException('Cliente eliminado', HttpStatus.NOT_FOUND);
     }
+
+    console.log('Cliente encontrado:', cliente);
 
     await this.clienteRepository.update(cod_contrato, { estado: false });
 
@@ -216,4 +237,15 @@ export class ClientesService {
 
     return { message: 'Clientes guardados correctamente' };
   }
+
+
+
+  /* pruebas para comentar todo esto */
+
+  findAllPrueba() {
+    return this.clienteRepository.find({
+      order: { cod_contrato: 'DESC' },
+    });
+  }  
+
 }

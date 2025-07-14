@@ -48,7 +48,7 @@ async function bootstrap() {
   const port = 3000;
   await app.listen(port);
 
-  // Interceptor global para manejo de errores
+  // Interceptor global para manejo de errores 
   // app.useGlobalInterceptors(new ErrorHandlingInterceptor());
 
 
